@@ -12,6 +12,7 @@
 #include "globals.h"
 #include "processor.h"
 #include "event_queue.h"
+#include <unistd.h>
 
 #define PID_INDEX        0
 #define USER_INDEX       1
