@@ -11,7 +11,7 @@ class Cache {
   explicit Cache(std::chrono::milliseconds duration) : cacheDuration(duration) {}
 
   // Check if cache is valid (if the data is still fresh)
-  [[nodiscard]] bool IsCacheValid() const {
+  bool IsCacheValid() const {
     return std::chrono::steady_clock::now() - lastUpdate < cacheDuration;
   }
 

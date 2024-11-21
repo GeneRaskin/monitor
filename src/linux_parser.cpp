@@ -7,6 +7,7 @@
 #include "globals.h"
 #include "mem_data.h"
 #include <sstream>
+#include <unordered_map>
 
 // Define a macro to switch between modern and legacy code
 #if __cplusplus >= 201703L  // C++17 and newer
@@ -14,6 +15,7 @@
 namespace fs = std::filesystem;
 #else
 #include <dirent.h>
+#include <cstring>
 #endif
 
 namespace LinuxParser {
