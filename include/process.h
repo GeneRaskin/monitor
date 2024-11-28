@@ -19,13 +19,12 @@ public:
   pid_t Pid();
   std::string User();
   const std::string& Command();
-  float CpuUtilization();
+  float CpuUtilization(bool allowUpdate = true);
   const ProcessMemUtilization& MemUtilization();
   long NiceValue();
   long PriorityValue();
   char State();
   double UpTime();
-  bool operator<(Process& a);
   unsigned int getNumThreads();
 
   explicit Process(pid_t pid);

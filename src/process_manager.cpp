@@ -70,8 +70,8 @@ std::vector<std::shared_ptr<Process>> ProcessManager::
 
   std::sort(sortedProcesses.begin(), sortedProcesses.end(),
             [] (const std::shared_ptr<Process>& l, const std::shared_ptr<Process>& r) {
-              if (std::abs(l->CpuUtilization() - r->CpuUtilization()) > 1e-3)
-                return l->CpuUtilization() > r->CpuUtilization();
+              if (std::abs(l->CpuUtilization(false) - r->CpuUtilization(false)) > 1e-3)
+                return l->CpuUtilization(false) > r->CpuUtilization(false);
               return l->Pid() < r->Pid();
             });
   return sortedProcesses;

@@ -34,8 +34,9 @@ int Process::Pid() { return this->pid_; }
 #define CLAMP(x,low,high) (((x)>(high))?(high):(((x)<(low))?(low):(x)))
 #endif
 
-float Process::CpuUtilization() {
-  _isUpdateNeeded();
+float Process::CpuUtilization(bool allowUpdate) {
+  if (allowUpdate)
+    _isUpdateNeeded();
   return this->_cpuUtilization;
 }
 
@@ -53,10 +54,6 @@ std::string Process::User() { return this->user_; }
 double Process::UpTime() {
   _isUpdateNeeded();
   return (double)(this->_utime + this->_stime) / sysconf(_SC_CLK_TCK);
-}
-
-bool Process::operator<(Process& a) {
-  return this->CpuUtilization() < a.CpuUtilization();
 }
 
 bool Process::isKernelProcess() {
