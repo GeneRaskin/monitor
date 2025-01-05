@@ -2,7 +2,7 @@
 #define PROCESSOR_H
 
 #include <cstdint>
-#include <memory>
+#include <optional>
 
 struct CPUData {
   uint64_t usertime;
@@ -16,7 +16,17 @@ struct CPUData {
   uint64_t guesttime;
   uint64_t guestnicetime;
   uint64_t totaltime;
-  std::shared_ptr<struct CPUData> prev_measurement = nullptr;
+};
+
+struct CPUDataWithHistory {
+  CPUData current;
+  std::optional<CPUData> previous;
+
+  CPUDataWithHistory() : current{}, previous(std::nullopt) {}
+
+  void setPrevious(const CPUData &other) {
+    previous = other;
+  }
 };
 
 #endif

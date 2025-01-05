@@ -29,7 +29,7 @@ struct procStatusFileData {
   unsigned int numThreads;
 };
 
-const std::vector<struct CPUData>& totalCpuUtilization();
+const std::vector<struct CPUDataWithHistory>& totalCpuUtilization();
 const struct MemData& MemoryUtilization();
 std::string LoadAverage();
 unsigned int numProcessesRunning();

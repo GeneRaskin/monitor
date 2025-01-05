@@ -289,8 +289,8 @@ unsigned int numProcessesRunning() {
   return numProcessesRunningCache.GetValue();
 }
 
-const std::vector<struct CPUData>& totalCpuUtilization() {
-  static Cache<std::vector<struct CPUData>> cpuCache(cacheDuration);
+const std::vector<struct CPUDataWithHistory>& totalCpuUtilization() {
+  static Cache<std::vector<struct CPUDataWithHistory>> cpuCache(cacheDuration);
 
   // Check if cache is valid
   if (cpuCache.IsCacheValid()) {
@@ -299,9 +299,9 @@ const std::vector<struct CPUData>& totalCpuUtilization() {
 
   std::string statFilePath = "/proc/stat";
   std::ifstream filestream(statFilePath);
-  std::vector<struct CPUData> cpuUtilizationStats;
+  std::vector<struct CPUDataWithHistory> cpuUtilizationStats;
   int curr_core_idx = 0;
-  const std::vector<struct CPUData>& cacheValue = cpuCache.GetValue();
+  const std::vector<struct CPUDataWithHistory>& cacheValue = cpuCache.GetValue();
 
   // Process each line in the /proc/stat file
   ProcessFileLines(
@@ -312,38 +312,39 @@ const std::vector<struct CPUData>& totalCpuUtilization() {
 
         // Check for "cpu" or "cpuN" labels to parse CPU data
         if (curr_field.find("cpu") == 0) {
-          struct CPUData cpuDataPerCore = {};
+          struct CPUDataWithHistory cpuDataPerCore = {};
           if (!cacheValue.empty() && (ssize_t)cacheValue.size() > curr_core_idx) {
-            const struct CPUData& prevData = cacheValue[curr_core_idx];
-            cpuDataPerCore.prev_measurement =
-                std::make_shared<struct CPUData>(prevData);
+            const struct CPUData& prevData = cacheValue[curr_core_idx].current;
+            cpuDataPerCore.setPrevious(prevData);
           }
           curr_core_idx++;
 
+          struct CPUData &currCpuDataPerCore = cpuDataPerCore.current;
+
           // Parse each field from the line as an unsigned long
-          curr_line >> cpuDataPerCore.usertime >> cpuDataPerCore.nicetime >>
-              cpuDataPerCore.systemtime >> cpuDataPerCore.idletime >>
-              cpuDataPerCore.iowaittime >> cpuDataPerCore.irqtime >>
-              cpuDataPerCore.softirqtime >> cpuDataPerCore.stealtime >>
-              cpuDataPerCore.guesttime >> cpuDataPerCore.guestnicetime;
+          curr_line >> currCpuDataPerCore.usertime >> currCpuDataPerCore.nicetime >>
+              currCpuDataPerCore.systemtime >> currCpuDataPerCore.idletime >>
+              currCpuDataPerCore.iowaittime >> currCpuDataPerCore.irqtime >>
+              currCpuDataPerCore.softirqtime >> currCpuDataPerCore.stealtime >>
+              currCpuDataPerCore.guesttime >> currCpuDataPerCore.guestnicetime;
 
           // Calculate total time
-          cpuDataPerCore.usertime =
-              cpuDataPerCore.usertime - cpuDataPerCore.guesttime;
-          cpuDataPerCore.nicetime =
-              cpuDataPerCore.nicetime - cpuDataPerCore.guestnicetime;
+          currCpuDataPerCore.usertime =
+              currCpuDataPerCore.usertime - currCpuDataPerCore.guesttime;
+          currCpuDataPerCore.nicetime =
+              currCpuDataPerCore.nicetime - currCpuDataPerCore.guestnicetime;
           uint64_t idlealltime =
-              cpuDataPerCore.idletime + cpuDataPerCore.iowaittime;
-          uint64_t systemalltime = cpuDataPerCore.systemtime +
-                                   cpuDataPerCore.irqtime +
-                                   cpuDataPerCore.softirqtime;
+              currCpuDataPerCore.idletime + currCpuDataPerCore.iowaittime;
+          uint64_t systemalltime = currCpuDataPerCore.systemtime +
+                                   currCpuDataPerCore.irqtime +
+                                   currCpuDataPerCore.softirqtime;
           uint64_t virtalltime =
-              cpuDataPerCore.guesttime + cpuDataPerCore.guestnicetime;
-          uint64_t totaltime = cpuDataPerCore.usertime +
-                               cpuDataPerCore.nicetime + systemalltime +
-                               idlealltime + cpuDataPerCore.stealtime +
+              currCpuDataPerCore.guesttime + currCpuDataPerCore.guestnicetime;
+          uint64_t totaltime = currCpuDataPerCore.usertime +
+                               currCpuDataPerCore.nicetime + systemalltime +
+                               idlealltime + currCpuDataPerCore.stealtime +
                                virtalltime;
-          cpuDataPerCore.totaltime = totaltime;
+          currCpuDataPerCore.totaltime = totaltime;
 
           // Add the parsed CPU data to the vector
           cpuUtilizationStats.emplace_back(cpuDataPerCore);

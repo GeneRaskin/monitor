@@ -24,6 +24,6 @@ std::string System::LoadAverage() {
   return LinuxParser::LoadAverage();
 }
 
-const std::vector<struct CPUData>& System::totalCpuUtilization() {
+const std::vector<struct CPUDataWithHistory>& System::totalCpuUtilization() {
   return LinuxParser::totalCpuUtilization();
 }

@@ -18,9 +18,9 @@ Process::Process(pid_t pid) {
     this->_is_kernel_process = true;
   }
 
-  std::vector<struct CPUData> totalCpuUtilizationValues =
+  std::vector<struct CPUDataWithHistory> totalCpuUtilizationValues =
       LinuxParser::totalCpuUtilization();
-  this->_lastTotalSystemJiffies = totalCpuUtilizationValues[0].totaltime;
+  this->_lastTotalSystemJiffies = totalCpuUtilizationValues[0].current.totaltime;
 
   _updateProcStatFileData();
   _updateProcStatusFileData();
@@ -115,9 +115,9 @@ void Process::_updateCpuUtilization() {
   unsigned long deltaActiveJiffies = currActiveJiffies - _lastActiveJiffies;
 
   // Retrieve and cache total CPU usage (global) every cache duration period
-  const std::vector<struct CPUData>& currTotalCpuUtilizationValues =
+  const std::vector<struct CPUDataWithHistory>& currTotalCpuUtilizationValues =
       LinuxParser::totalCpuUtilization();  // Uses cached global data
-  unsigned long currTotalCpuUtilization = currTotalCpuUtilizationValues[0].totaltime;
+  unsigned long currTotalCpuUtilization = currTotalCpuUtilizationValues[0].current.totaltime;
   int num_cpus = std::max(1, (int)currTotalCpuUtilizationValues.size() - 1);
 
   // Calculate CPU usage as a ratio of the process' delta to system delta

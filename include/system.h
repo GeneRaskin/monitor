@@ -11,7 +11,7 @@ class System {
   static const struct MemData& MemoryUtilization();
   static unsigned long long UpTime();
   static std::string LoadAverage();
-  static const std::vector<struct CPUData>& totalCpuUtilization();
+  static const std::vector<struct CPUDataWithHistory>& totalCpuUtilization();
   std::string Kernel();
   std::string OperatingSystem();
   ProcessManager processManager;

@@ -290,16 +290,16 @@ static void displayProcesses(
 
 static void drawSingleCpuBar(
     WINDOW* upperPanel, int start_y, int start_x, int core_idx, int bar_length,
-    const std::vector<struct CPUData>& cpu_data) {
-  const struct CPUData& currCoreData = cpu_data[core_idx];
+    const std::vector<struct CPUDataWithHistory>& cpu_data) {
+  const struct CPUData& currCoreData = cpu_data[core_idx].current;
   std::vector<float> utilizationVec;
   std::vector<ColorPairs> colorPairsVec;
   float utilization =
       (1.0f - (double)(currCoreData.idletime) / currCoreData.totaltime);
 
-  if (cpu_data[core_idx].prev_measurement != nullptr) {
+  if (cpu_data[core_idx].previous.has_value()) {
     const struct CPUData& prevCoreData =
-        *cpu_data[core_idx].prev_measurement;
+        cpu_data[core_idx].previous.value();
     uint64_t totaltime_delta = currCoreData.totaltime - prevCoreData.totaltime;
     uint64_t idletime_delta = currCoreData.idletime - prevCoreData.idletime;
     utilization = (1.0f - (double)(idletime_delta) / totaltime_delta);
@@ -328,7 +328,7 @@ static void drawSingleCpuBar(
   barToDraw.drawBar();
 }
 
-static void drawCpuBars(WINDOW* upperPanel, const std::vector<struct CPUData>& cpu_data) {
+static void drawCpuBars(WINDOW* upperPanel, const std::vector<struct CPUDataWithHistory>& cpu_data) {
   int window_width = getmaxx(upperPanel);
   int num_cores = std::max((int)cpu_data.size() - 1, 1);
   werase(upperPanel);
